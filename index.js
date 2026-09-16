@@ -205,22 +205,33 @@ async function startNoxis() {
         const cleanText = getTextFromMessage(message).trim();
 
         // ── Resolve sender ─────────────────────────────────
+        const isFromMe = message.key.fromMe;
+
         let meta = null;
         if (jid.endsWith("@g.us")) {
             try { meta = await sock.groupMetadata(jid); } catch (_) {}
         }
 
-        const senderRaw = permissions.getSenderJid(message, meta);
+        // Group  → key.participant (may be @lid, resolved by getSenderJid)
+        // DM fromMe → bot's own JID (owner messaging themselves)
+        // DM from other → remoteJid
+        let senderRaw;
+        if (jid.endsWith("@g.us")) {
+            senderRaw = permissions.getSenderJid(message, meta);
+        } else if (isFromMe) {
+            senderRaw = (sock.user?.id || "").replace(/:\d+@/, "@");
+        } else {
+            senderRaw = jid;
+        }
 
-        // Determine relationship to THIS bot
-        const botPhone    = BOT_PHONE;
+        const botPhone      = BOT_PHONE;
         const senderIsOwner = botPhone
             ? ownerLib.isOwnerOfBot(senderRaw, botPhone, meta)
             : false;
-        const senderIsSudo  = botPhone
+        // fromMe always passes — owner is messaging themselves
+        const senderIsSudo  = isFromMe || (botPhone
             ? ownerLib.isSudo(senderRaw, botPhone, meta)
-            : false;
-        const isFromMe      = message.key.fromMe;
+            : false);
 
         // ── XP ─────────────────────────────────────────────
         try { await xpSystem.handleXP(sock, message); }

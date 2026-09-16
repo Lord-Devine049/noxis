@@ -1,3 +1,11 @@
+/*
+ * owner.js — NØXIS
+ * Multi-owner system — no OWNER_NUMBER env needed
+ * Owners are auto-added when they pair, auto-removed on logout
+ * Each owner gets their own config in database/configs/<number>.json
+ * Ported from Uchiha Crittix Domain by Lord Devine
+ */
+
 const fs   = require("fs");
 const path = require("path");
 
@@ -118,7 +126,7 @@ function _configPath(num) {
 function _defaultConfig(num) {
     return {
         ownerNumber : num,
-        mode        : "self",       // "self" | "public"
+        mode        : "public",       // "self" | "public"
         prefix      : ".",
         sudoUsers   : [],
         createdAt   : Date.now(),
