@@ -1,126 +1,49 @@
-const groupSettings =
-    require("../database/groupSettings");
+const groupSettings = require("../database/groupSettings");
+const permissions   = require("../config/permissions");
+const sudo          = require("../config/sudo");
 
-const permissions =
-    require("../config/permissions");
+const URL_PATTERN            = /(?:https?:\/\/|www\.)\S+/i;
+const WHATSAPP_GROUP_PATTERN = /chat\.whatsapp\.com\/[A-Za-z0-9]+/i;
 
-const sudo =
-    require("../config/sudo");
+async function handleAntiLink(sock, message, text, meta) {
+    const jid = message?.key?.remoteJid;
+    if (!permissions.isGroup(jid)) return false;
 
-const URL_PATTERN =
-    /(?:https?:\/\/|www\.)\S+/i;
+    const settings = groupSettings.getSettings(jid);
+    if (!settings.antilink) return false;
 
-const WHATSAPP_GROUP_PATTERN =
-    /chat\.whatsapp\.com\/[A-Za-z0-9]+/i;
+    if (!URL_PATTERN.test(text) && !WHATSAPP_GROUP_PATTERN.test(text)) return false;
 
-async function handleAntiLink(
-    sock,
-    message,
-    text
-) {
-
-    const jid =
-        message?.key?.remoteJid;
-
-    if (!permissions.isGroup(jid)) {
-        return false;
+    if (!meta) {
+        try { meta = await sock.groupMetadata(jid); } catch (_) {}
     }
 
-    const settings =
-        groupSettings.getSettings(jid);
+    const senderJid     = permissions.getSenderJid(message, meta);
+    const senderIsSudo  = sudo.isSudo(senderJid);
+    const senderIsAdmin = await permissions.isGroupAdmin(sock, jid, senderJid);
 
-    if (!settings.antilink) {
-        return false;
-    }
-
-    if (
-        !URL_PATTERN.test(text) &&
-        !WHATSAPP_GROUP_PATTERN.test(text)
-    ) {
-        return false;
-    }
-
-    const sender =
-        permissions.getSenderJid(message);
-
-    const senderIsSudo =
-        sudo.isSudo(sender);
-
-    const senderIsAdmin =
-        await permissions.isGroupAdmin(
-            sock,
-            jid,
-            sender
-        );
-
-    if (
-        senderIsSudo ||
-        senderIsAdmin
-    ) {
-        return false;
-    }
-
-    /*
-     * SEND QUOTED WARNING
-     */
+    if (senderIsSudo || senderIsAdmin) return false;
 
     try {
-
-        await sock.sendMessage(
-            jid,
-            {
-                text:
+        await sock.sendMessage(jid, {
+            text:
 `🚫 𓊈⸸𓊉 𝑨𝑵𝑻𝑰-𝑳𝑰𝑵𝑲
 
-👤 @${sender.split("@")[0]}
+👤 @${senderJid.split("@")[0]}
 
 🔗 Your link has been removed.
-
-⚠️ Please do not send links
-in this group.
+⚠️ Do not send links in this group.
 
 𓊈⸸𓊉 𝑵Ø𝑿𝑰𝑺`,
-                mentions: [
-                    sender
-                ]
-            },
-            {
-                quoted: message
-            }
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Anti-link quote error:",
-            error.message
-        );
-    }
-
-    /*
-     * DELETE OFFENDING MESSAGE
-     */
+            mentions: [senderJid]
+        }, { quoted: message });
+    } catch (e) { console.error("Anti-link warn error:", e.message); }
 
     try {
-
-        await sock.sendMessage(
-            jid,
-            {
-                delete: message.key
-            }
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Anti-link delete error:",
-            error.message
-        );
-    }
+        await sock.sendMessage(jid, { delete: message.key });
+    } catch (e) { console.error("Anti-link delete error:", e.message); }
 
     return true;
 }
 
-module.exports = {
-    handleAntiLink
-};
+module.exports = { handleAntiLink };
