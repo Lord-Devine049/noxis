@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NØXIS • Clan Pairing</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: #050505;
+    color: #fff;
+    font-family: Arial, sans-serif;
+}
+
+.card {
+    width: 100%;
+    max-width: 430px;
+    padding: 28px;
+    border: 1px solid #333;
+    border-radius: 18px;
+    background: #0d0d0d;
+    box-shadow: 0 0 35px rgba(255,255,255,.05);
+}
+
+.logo {
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #aaa;
+    margin-bottom: 25px;
+}
+
+label {
+    display: block;
+    margin: 15px 0 8px;
+    font-size: 13px;
+    color: #bbb;
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #333;
+    border-radius: 10px;
+    background: #151515;
+    color: #fff;
+    outline: none;
+    font-size: 16px;
+}
+
+button {
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px;
+    border: 0;
+    border-radius: 10px;
+    background: #fff;
+    color: #000;
+    font-weight: bold;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+#result {
+    display: none;
+    margin-top: 20px;
+    padding: 18px;
+    border-radius: 12px;
+    background: #151515;
+    text-align: center;
+}
+
+.code {
+    margin-top: 10px;
+    font-size: 27px;
+    letter-spacing: 5px;
+    font-weight: bold;
+}
+
+.error {
+    color: #ff6b6b;
+}
+
+.steps {
+    margin-top: 25px;
+    color: #aaa;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.footer {
+    margin-top: 25px;
+    text-align: center;
+    color: #666;
+    font-size: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <div class="logo">𓊈⸸𓊉 NØXIS</div>
+
+    <div class="subtitle">
+        CLAN PAIRING PORTAL
+    </div>
+
+    <p>
+        Link your WhatsApp to the NØXIS clan system.
+    </p>
+
+    <label for="phone">
+        WHATSAPP NUMBER
+    </label>
+
+    <input
+        id="phone"
+        type="tel"
+        inputmode="numeric"
+        placeholder="2348012345678"
+        autocomplete="tel"
+    >
+
+    <button id="pairBtn">
+        GENERATE PAIRING CODE
+    </button>
+
+    <div id="result">
+        <div id="resultTitle">
+            YOUR WHATSAPP PAIRING CODE
+        </div>
+
+        <div id="code" class="code"></div>
+    </div>
+
+    <div class="steps">
+        <strong>HOW TO LINK</strong><br>
+        1. Open WhatsApp on the phone you want to connect.<br>
+        2. Open <b>Linked Devices</b>.<br>
+        3. Select <b>Link a Device</b>, then choose
+        <b>Link with phone number instead</b>.<br>
+        4. Enter the pairing code shown above.
+    </div>
+
+    <div class="footer">
+        𓊈⸸𓊉 NØXIS • NIGHTMARE YT • CLAN SYSTEM
+    </div>
+
+</div>
+
+<script>
+const button = document.getElementById("pairBtn");
+const phoneInput = document.getElementById("phone");
+const result = document.getElementById("result");
+const resultTitle = document.getElementById("resultTitle");
+const codeBox = document.getElementById("code");
+
+button.addEventListener("click", async () => {
+
+    const phone =
+        phoneInput.value.replace(/\D/g, "");
+
+    if (!phone) {
+        alert("Enter your WhatsApp number first.");
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = "GENERATING...";
+
+    result.style.display = "block";
+    resultTitle.textContent =
+        "CONNECTING TO NØXIS...";
+    codeBox.textContent = "";
+
+    try {
+
+        const response =
+            await fetch("/api/pair", {
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body: JSON.stringify({
+                    phone
+                })
+            });
+
+        const data =
+            await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data.error ||
+                "Unable to generate pairing code."
+            );
+        }
+
+        resultTitle.textContent =
+            "YOUR WHATSAPP PAIRING CODE";
+
+        codeBox.textContent =
+            data.code || "ERROR";
+
+    } catch (error) {
+
+        resultTitle.textContent = "ERROR";
+
+        codeBox.textContent =
+            error.message ||
+            "Connection failed.";
+
+        codeBox.classList.add("error");
+
+    } finally {
+
+        button.disabled = false;
+        button.textContent =
+            "GENERATE PAIRING CODE";
+    }
+});
+</script>
+
+</body>
+</html>

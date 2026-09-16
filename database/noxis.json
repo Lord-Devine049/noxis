@@ -1,0 +1,128 @@
+{
+  "members": {
+    "test@s.whatsapp.net": {
+      "jid": "test@s.whatsapp.net",
+      "name": "Test Member",
+      "xp": 15,
+      "rank": "RECRUIT",
+      "streak": 0,
+      "eventsWon": 0,
+      "registeredAt": "2026-09-16T03:21:59.067Z",
+      "lastActive": "2026-09-16T06:06:38.961Z"
+    },
+    "event-test@s.whatsapp.net": {
+      "jid": "event-test@s.whatsapp.net",
+      "name": "NØXIS Event Tester",
+      "xp": 30,
+      "rank": "RECRUIT",
+      "streak": 0,
+      "eventsWon": 1,
+      "registeredAt": "2026-09-16T06:14:37.626Z",
+      "lastActive": "2026-09-16T06:14:37.649Z"
+    },
+    "winner@s.whatsapp.net": {
+      "jid": "winner@s.whatsapp.net",
+      "name": "NØXIS Winner",
+      "xp": 30,
+      "rank": "RECRUIT",
+      "streak": 0,
+      "eventsWon": 1,
+      "registeredAt": "2026-09-16T06:19:34.771Z",
+      "lastActive": "2026-09-16T06:19:34.771Z"
+    },
+    "progress-test@s.whatsapp.net": {
+      "jid": "progress-test@s.whatsapp.net",
+      "name": "NØXIS Progress Tester",
+      "xp": 0,
+      "rank": "RECRUIT",
+      "streak": 0,
+      "eventsWon": 0,
+      "achievements": [],
+      "registeredAt": "2026-09-16T06:27:56.136Z",
+      "lastActive": null
+    },
+    "111111111@s.whatsapp.net": {
+      "jid": "111111111@s.whatsapp.net",
+      "name": "NØXIS Member",
+      "xp": 0,
+      "rank": "RECRUIT",
+      "streak": 0,
+      "eventsWon": 0,
+      "achievements": [],
+      "registeredAt": "2026-09-16T06:55:42.464Z",
+      "lastActive": null
+    }
+  },
+  "events": [
+    {
+      "id": "1789539539449",
+      "type": "coding",
+      "groupJid": "987654321@g.us",
+      "question": "💻 Which command lists files and folders?",
+      "answer": "ls",
+      "xp": 15,
+      "active": true,
+      "startedAt": "2026-09-16T06:18:59.449Z",
+      "winnerJid": null
+    },
+    {
+      "id": "1789539574757",
+      "type": "coding",
+      "groupJid": "555555555@g.us",
+      "question": "💻 Which command shows the installed npm version?",
+      "answer": "npm -v",
+      "xp": 30,
+      "active": false,
+      "startedAt": "2026-09-16T06:19:34.757Z",
+      "winnerJid": "winner@s.whatsapp.net",
+      "endedAt": "2026-09-16T06:19:34.773Z"
+    }
+  ],
+  "answers": [
+    {
+      "jid": "test@s.whatsapp.net",
+      "amount": 15,
+      "reason": "Coding Event",
+      "timestamp": "2026-09-16T06:06:38.961Z"
+    },
+    {
+      "jid": "event-test@s.whatsapp.net",
+      "amount": 30,
+      "reason": "Coding Event",
+      "timestamp": "2026-09-16T06:14:37.649Z"
+    },
+    {
+      "jid": "winner@s.whatsapp.net",
+      "amount": 30,
+      "reason": "Coding Event",
+      "timestamp": "2026-09-16T06:19:34.771Z"
+    }
+  ],
+  "groups": {
+    "123456789@g.us": {
+      "jid": "123456789@g.us",
+      "name": "NØXIS TEST GROUP",
+      "joinedAt": "2026-09-16T06:06:38.946Z",
+      "lastSeen": "2026-09-16T06:06:38.959Z"
+    },
+    "987654321@g.us": {
+      "jid": "987654321@g.us",
+      "name": "NØXIS Group",
+      "joinedAt": "2026-09-16T06:18:59.429Z",
+      "lastSeen": "2026-09-16T06:18:59.446Z"
+    },
+    "555555555@g.us": {
+      "jid": "555555555@g.us",
+      "name": "NØXIS Group",
+      "joinedAt": "2026-09-16T06:19:34.754Z",
+      "lastSeen": "2026-09-16T06:19:34.755Z"
+    },
+    "scheduler-test@g.us": {
+      "jid": "scheduler-test@g.us",
+      "name": "NØXIS Scheduler Test",
+      "joinedAt": "2026-09-16T06:23:19.257Z",
+      "lastSeen": "2026-09-16T06:23:19.280Z",
+      "nextCodingEventAt": 1789557799281
+    }
+  }
+}
