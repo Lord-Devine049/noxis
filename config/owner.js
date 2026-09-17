@@ -126,7 +126,7 @@ function _configPath(num) {
 function _defaultConfig(num) {
     return {
         ownerNumber : num,
-        mode        : "public",       // "self" | "public"
+        mode        : "self",       // "self" | "public"
         prefix      : ".",
         sudoUsers   : [],
         createdAt   : Date.now(),

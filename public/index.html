@@ -171,77 +171,100 @@ button:disabled {
 </div>
 
 <script>
-const button = document.getElementById("pairBtn");
-const phoneInput = document.getElementById("phone");
-const result = document.getElementById("result");
+const button      = document.getElementById("pairBtn");
+const phoneInput  = document.getElementById("phone");
+const result      = document.getElementById("result");
 const resultTitle = document.getElementById("resultTitle");
-const codeBox = document.getElementById("code");
+const codeBox     = document.getElementById("code");
+
+let pollInterval = null;
+
+function stopPolling() {
+    if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+}
 
 button.addEventListener("click", async () => {
 
-    const phone =
-        phoneInput.value.replace(/\D/g, "");
+    const phone = phoneInput.value.replace(/\D/g, "");
+    if (!phone) { alert("Enter your WhatsApp number first."); return; }
 
-    if (!phone) {
-        alert("Enter your WhatsApp number first.");
-        return;
-    }
-
+    stopPolling();
     button.disabled = true;
-    button.textContent = "GENERATING...";
-
+    button.textContent = "CONNECTING...";
     result.style.display = "block";
-    resultTitle.textContent =
-        "CONNECTING TO NØXIS...";
+    resultTitle.textContent = "CONNECTING TO NØXIS...";
     codeBox.textContent = "";
+    codeBox.classList.remove("error");
 
     try {
+        // Fire pairing request — returns immediately
+        const res  = await fetch("/api/pair", {
+            method : "POST",
+            headers: { "Content-Type": "application/json" },
+            body   : JSON.stringify({ phone })
+        });
+        const data = await res.json();
 
-        const response =
-            await fetch("/api/pair", {
-                method: "POST",
+        if (!res.ok) throw new Error(data.error || "Unable to start pairing.");
 
-                headers: {
-                    "Content-Type":
-                        "application/json"
-                },
+        resultTitle.textContent = "WAITING FOR CODE...";
 
-                body: JSON.stringify({
-                    phone
-                })
-            });
+        // Poll every 2s until code appears — same as Uchiha
+        let attempts = 0;
+        pollInterval = setInterval(async () => {
+            attempts++;
+            try {
+                const sr   = await fetch(`/api/pair/status/${phone}`);
+                const stat = await sr.json();
 
-        const data =
-            await response.json();
+                if (stat.error) {
+                    stopPolling();
+                    resultTitle.textContent = "ERROR";
+                    codeBox.textContent = stat.error;
+                    codeBox.classList.add("error");
+                    button.disabled = false;
+                    button.textContent = "GENERATE PAIRING CODE";
+                    return;
+                }
 
-        if (!response.ok) {
-            throw new Error(
-                data.error ||
-                "Unable to generate pairing code."
-            );
-        }
+                if (stat.code) {
+                    stopPolling();
+                    resultTitle.textContent = "YOUR WHATSAPP PAIRING CODE";
+                    codeBox.textContent = stat.code;
+                    button.disabled = false;
+                    button.textContent = "GENERATE PAIRING CODE";
+                    return;
+                }
 
-        resultTitle.textContent =
-            "YOUR WHATSAPP PAIRING CODE";
+                if (stat.paired && stat.connected) {
+                    stopPolling();
+                    resultTitle.textContent = "✅ ALREADY CONNECTED";
+                    codeBox.textContent = "This number is already linked.";
+                    button.disabled = false;
+                    button.textContent = "GENERATE PAIRING CODE";
+                    return;
+                }
 
-        codeBox.textContent =
-            data.code || "ERROR";
+                // Timeout after 60s
+                if (attempts > 30) {
+                    stopPolling();
+                    resultTitle.textContent = "ERROR";
+                    codeBox.textContent = "Timed out. Please try again.";
+                    codeBox.classList.add("error");
+                    button.disabled = false;
+                    button.textContent = "GENERATE PAIRING CODE";
+                }
+
+            } catch (_) {}
+        }, 2000);
 
     } catch (error) {
-
+        stopPolling();
         resultTitle.textContent = "ERROR";
-
-        codeBox.textContent =
-            error.message ||
-            "Connection failed.";
-
+        codeBox.textContent = error.message || "Connection failed.";
         codeBox.classList.add("error");
-
-    } finally {
-
         button.disabled = false;
-        button.textContent =
-            "GENERATE PAIRING CODE";
+        button.textContent = "GENERATE PAIRING CODE";
     }
 });
 </script>
